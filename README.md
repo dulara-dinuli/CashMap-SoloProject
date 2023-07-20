@@ -31,6 +31,9 @@ CashMap is a personal budget-handling app that helps to manage users' daily tran
 CashMap - Login Window
 <img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-Login.png?raw=true">
 
+CashMap - Dashboard
+<img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-Dashboard.png?raw=true">
+
 #
 
 <h3>App UI drafts (which are to be implemented):</h3>
