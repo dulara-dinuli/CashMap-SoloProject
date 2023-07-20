@@ -4,6 +4,7 @@
  */
 package com.projectcashmap.cashmap;
 
+//for the navigation bar
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
@@ -12,6 +13,19 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+
+//for the line chart
+import java.awt.Color;
+import chart.ModelChart;
+
+//for the table
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -72,6 +86,11 @@ public class Dashboard extends javax.swing.JFrame {
         setNavItemBackground(navDashboard);
         
         addActionToNavbarItems();
+        
+        // create the line chart
+        assetsGrowthChart.setTitle("Assets Growth");
+        assetsGrowthChart.addLegend("Amount (LKR)", Color.decode("#00b5a0"), Color.decode("#004d44"));
+        lineChart();
     
     }
     
@@ -192,6 +211,32 @@ public class Dashboard extends javax.swing.JFrame {
             }
         }
     }
+    
+    private void lineChart() {
+
+        try {
+            List<modelAssetGrowthChart> lists = new ArrayList<>();
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "select assetgrowth_year as `Year`, assetgrowth_money as Amount from assetgrowth order by assetgrowth_year DESC";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            ResultSet r = p.executeQuery();
+            while (r.next()) {
+                int year = r.getInt("year");
+                double amount = r.getDouble("amount");
+                lists.add(new modelAssetGrowthChart(year, amount));
+            }
+        
+            //  Add Data to chart
+            for (int i = lists.size() - 1; i >= 0; i--) {
+                modelAssetGrowthChart d = lists.get(i);
+                assetsGrowthChart.addData(new ModelChart(String.valueOf(d.getYear()), new double[]{d.getAmount()}));
+            }
+            //  Start to show data with animation
+            assetsGrowthChart.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -218,7 +263,21 @@ public class Dashboard extends javax.swing.JFrame {
         logOut = new javax.swing.JLabel();
         logOutIcon = new javax.swing.JLabel();
         dashboard = new javax.swing.JPanel();
+        Dashboard_Upper = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        netAsset = new javax.swing.JLabel();
+        currentAsset = new javax.swing.JLabel();
+        currentLiabilities = new javax.swing.JLabel();
+        Dashboard_Left = new javax.swing.JPanel();
+        assetsGrowthChart = new chart.CurveLineChart();
+        Dashboard_Right = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        assetsGrowthTable = new javax.swing.JTable();
+        update = new javax.swing.JButton();
+        add = new javax.swing.JButton();
+        delete = new javax.swing.JButton();
         cashOnHand = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         stockMarket = new javax.swing.JPanel();
@@ -233,8 +292,13 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
-        jPanel1.setBackground(new java.awt.Color(47, 47, 57));
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
         navbar.setBackground(new java.awt.Color(29, 29, 47));
 
@@ -291,7 +355,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         userName.setFont(new java.awt.Font("SimSun", 1, 20)); // NOI18N
         userName.setForeground(new java.awt.Color(255, 255, 255));
-        userName.setText("Dulmin");
+        userName.setText("Admin");
         userName.setIconTextGap(5);
 
         userIcon.setBackground(new java.awt.Color(255, 255, 255));
@@ -339,9 +403,9 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addComponent(logOut, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
+                .addGap(15, 15, 15)
+                .addComponent(logOut, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
                 .addComponent(logOutIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15, 15, 15))
         );
@@ -390,37 +454,204 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(navPersonalLoan, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(navFixedDeposit, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        dashboard.setBackground(new java.awt.Color(47, 47, 57));
+        dashboard.setBackground(new java.awt.Color(255, 255, 255));
+        dashboard.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        dashboard.setPreferredSize(new java.awt.Dimension(1069, 630));
 
-        jLabel1.setBackground(new java.awt.Color(47, 47, 57));
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        Dashboard_Upper.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel1.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel1.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(96, 96, 96));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Dashboard");
-        jLabel1.setOpaque(true);
+        jLabel1.setText("Current Liabilities");
+
+        jLabel8.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel8.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(96, 96, 96));
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel8.setText("Net Assets");
+
+        jLabel9.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel9.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(96, 96, 96));
+        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel9.setText("Current Assets");
+
+        netAsset.setBackground(new java.awt.Color(247, 247, 247));
+        netAsset.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        netAsset.setForeground(new java.awt.Color(81, 81, 81));
+        netAsset.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        netAsset.setText("1,000,000.00 ");
+        netAsset.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 255, 255), new java.awt.Color(255, 255, 255), new java.awt.Color(191, 191, 191), new java.awt.Color(255, 255, 255)));
+        netAsset.setOpaque(true);
+
+        currentAsset.setBackground(new java.awt.Color(247, 247, 247));
+        currentAsset.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        currentAsset.setForeground(new java.awt.Color(81, 81, 81));
+        currentAsset.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        currentAsset.setText("1,000,000.00 ");
+        currentAsset.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 255, 255), new java.awt.Color(255, 255, 255), new java.awt.Color(191, 191, 191), new java.awt.Color(255, 255, 255)));
+        currentAsset.setOpaque(true);
+
+        currentLiabilities.setBackground(new java.awt.Color(247, 247, 247));
+        currentLiabilities.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        currentLiabilities.setForeground(new java.awt.Color(81, 81, 81));
+        currentLiabilities.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        currentLiabilities.setText("1,000,000.00 ");
+        currentLiabilities.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 255, 255), new java.awt.Color(255, 255, 255), new java.awt.Color(191, 191, 191), new java.awt.Color(255, 255, 255)));
+        currentLiabilities.setOpaque(true);
+
+        javax.swing.GroupLayout Dashboard_UpperLayout = new javax.swing.GroupLayout(Dashboard_Upper);
+        Dashboard_Upper.setLayout(Dashboard_UpperLayout);
+        Dashboard_UpperLayout.setHorizontalGroup(
+            Dashboard_UpperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(Dashboard_UpperLayout.createSequentialGroup()
+                .addGap(31, 31, 31)
+                .addGroup(Dashboard_UpperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(netAsset, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
+                .addGroup(Dashboard_UpperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentAsset, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(65, 65, 65)
+                .addGroup(Dashboard_UpperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(currentLiabilities, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(32, 32, 32))
+        );
+        Dashboard_UpperLayout.setVerticalGroup(
+            Dashboard_UpperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(Dashboard_UpperLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(Dashboard_UpperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(Dashboard_UpperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(netAsset, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentAsset, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentLiabilities, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(14, Short.MAX_VALUE))
+        );
+
+        Dashboard_Left.setBackground(new java.awt.Color(255, 255, 255));
+        Dashboard_Left.setBorder(javax.swing.BorderFactory.createEmptyBorder(50, 10, 10, 10));
+
+        assetsGrowthChart.setForeground(new java.awt.Color(102, 102, 102));
+        assetsGrowthChart.setFillColor(true);
+
+        javax.swing.GroupLayout Dashboard_LeftLayout = new javax.swing.GroupLayout(Dashboard_Left);
+        Dashboard_Left.setLayout(Dashboard_LeftLayout);
+        Dashboard_LeftLayout.setHorizontalGroup(
+            Dashboard_LeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(assetsGrowthChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        Dashboard_LeftLayout.setVerticalGroup(
+            Dashboard_LeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(assetsGrowthChart, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+        );
+
+        Dashboard_Right.setBackground(new java.awt.Color(255, 255, 255));
+        Dashboard_Right.setBorder(javax.swing.BorderFactory.createEmptyBorder(50, 0, 10, 10));
+
+        assetsGrowthTable.setBackground(new java.awt.Color(255, 255, 255));
+        assetsGrowthTable.setForeground(new java.awt.Color(51, 51, 51));
+        assetsGrowthTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        assetsGrowthTable.setOpaque(false);
+        assetsGrowthTable.setRowHeight(40);
+        assetsGrowthTable.setSelectionBackground(new java.awt.Color(118, 152, 154));
+        assetsGrowthTable.setSelectionForeground(new java.awt.Color(51, 51, 51));
+        jScrollPane1.setViewportView(assetsGrowthTable);
+
+        update.setBackground(new java.awt.Color(0, 67, 61));
+        update.setForeground(new java.awt.Color(255, 255, 255));
+        update.setText("Update");
+        update.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateActionPerformed(evt);
+            }
+        });
+
+        add.setBackground(new java.awt.Color(0, 67, 61));
+        add.setForeground(new java.awt.Color(255, 255, 255));
+        add.setText("Add");
+        add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addActionPerformed(evt);
+            }
+        });
+
+        delete.setBackground(new java.awt.Color(0, 67, 61));
+        delete.setForeground(new java.awt.Color(255, 255, 255));
+        delete.setText("Delete");
+        delete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout Dashboard_RightLayout = new javax.swing.GroupLayout(Dashboard_Right);
+        Dashboard_Right.setLayout(Dashboard_RightLayout);
+        Dashboard_RightLayout.setHorizontalGroup(
+            Dashboard_RightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(Dashboard_RightLayout.createSequentialGroup()
+                .addGap(130, 130, 130)
+                .addComponent(add)
+                .addGap(42, 42, 42)
+                .addComponent(update)
+                .addGap(40, 40, 40)
+                .addComponent(delete)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 509, Short.MAX_VALUE)
+        );
+        Dashboard_RightLayout.setVerticalGroup(
+            Dashboard_RightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(Dashboard_RightLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(Dashboard_RightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(add)
+                    .addComponent(update)
+                    .addComponent(delete))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout dashboardLayout = new javax.swing.GroupLayout(dashboard);
         dashboard.setLayout(dashboardLayout);
         dashboardLayout.setHorizontalGroup(
             dashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(Dashboard_Upper, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(dashboardLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(299, Short.MAX_VALUE))
+                .addComponent(Dashboard_Left, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Dashboard_Right, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         dashboardLayout.setVerticalGroup(
             dashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(dashboardLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(Dashboard_Upper, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(dashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(Dashboard_Left, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(Dashboard_Right, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
-        cashOnHand.setBackground(new java.awt.Color(47, 47, 57));
+        cashOnHand.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel2.setBackground(new java.awt.Color(47, 47, 57));
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
@@ -446,7 +677,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(317, Short.MAX_VALUE))
         );
 
-        stockMarket.setBackground(new java.awt.Color(47, 47, 57));
+        stockMarket.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel3.setBackground(new java.awt.Color(47, 47, 57));
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
@@ -472,7 +703,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(317, Short.MAX_VALUE))
         );
 
-        bank.setBackground(new java.awt.Color(47, 47, 57));
+        bank.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel4.setBackground(new java.awt.Color(47, 47, 57));
         jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
@@ -498,7 +729,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(317, Short.MAX_VALUE))
         );
 
-        binance.setBackground(new java.awt.Color(47, 47, 57));
+        binance.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel5.setBackground(new java.awt.Color(47, 47, 57));
         jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
@@ -524,7 +755,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(317, Short.MAX_VALUE))
         );
 
-        personalLoan.setBackground(new java.awt.Color(47, 47, 57));
+        personalLoan.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel6.setBackground(new java.awt.Color(47, 47, 57));
         jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
@@ -540,7 +771,7 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(personalLoanLayout.createSequentialGroup()
                 .addGap(265, 265, 265)
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(297, Short.MAX_VALUE))
+                .addContainerGap(529, Short.MAX_VALUE))
         );
         personalLoanLayout.setVerticalGroup(
             personalLoanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -550,7 +781,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(317, Short.MAX_VALUE))
         );
 
-        fixedDeposit.setBackground(new java.awt.Color(47, 47, 57));
+        fixedDeposit.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel7.setBackground(new java.awt.Color(47, 47, 57));
         jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
@@ -602,7 +833,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(binance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                    .addGap(0, 202, Short.MAX_VALUE)
+                    .addGap(0, 193, Short.MAX_VALUE)
                     .addComponent(personalLoan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -648,6 +879,154 @@ public class Dashboard extends javax.swing.JFrame {
         login.setVisible(true);
     }//GEN-LAST:event_logOutIconMouseClicked
 
+    private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
+        // Insert data to the database
+        
+        int selectedRow = assetsGrowthTable.getSelectedRow();
+
+        int oldYear = Integer.parseInt(assetsGrowthTable.getValueAt(selectedRow, 0).toString());
+        int newYear = Integer.parseInt(assetsGrowthTable.getValueAt(selectedRow, 0).toString());
+
+        
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            
+            // Check if the new year matches any existing year in the table
+            String sqlCheck = "SELECT COUNT(*) FROM assetgrowth WHERE assetgrowth_year=?";
+            PreparedStatement pCheck = DatabaseConnection.getInstance().getConnection().prepareStatement(sqlCheck);
+            pCheck.setInt(1, newYear);
+            ResultSet rCheck = pCheck.executeQuery();
+            rCheck.next();
+            int count = rCheck.getInt(1);
+            pCheck.close();
+
+            if (count > 0) {
+                int confirm = JOptionPane.showConfirmDialog(this, "The year already exists.", "Warning", JOptionPane.WARNING_MESSAGE, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            String sql = "insert into assetgrowth(assetgrowth_year, assetgrowth_money, assetgrowth_change)values('"
+                    +assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),0)+"','"
+                    +assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),1)+"','"
+                    +assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),2)+"')";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            boolean r = p.execute();
+            if(!r){
+                JOptionPane.showMessageDialog(this, "Inserted.");
+                formWindowOpened(null);
+                assetsGrowthChart.clear();
+                lineChart();
+            }else{
+                JOptionPane.showMessageDialog(this, "Error! Try Again.");
+            }
+            
+            p.close();
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_addActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        // add data to the table
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "SELECT * FROM assetgrowth";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            ResultSet r = p.executeQuery();
+
+            // Create a list to hold the data rows with the additional column
+            List<String[]> rowData = new ArrayList<>();
+
+            while (r.next()) {
+                int year = r.getInt("assetgrowth_year");
+                double money = r.getDouble("assetgrowth_money");
+                double change = r.getDouble("assetgrowth_change");
+                double percentage = (change*100)/money;
+                
+                // Create a DecimalFormat instance with the desired format pattern
+                DecimalFormat df = new DecimalFormat("#.##");
+                String formattedPercentage = df.format(percentage)+" %";
+                
+                rowData.add(new String[]{String.valueOf(year), String.valueOf(money), String.valueOf(change), String.valueOf(formattedPercentage)});
+            }
+
+            String[] columnName = {"Year", "Money (LKR)", "Change (LKR)", "Percentage"}; 
+            DefaultTableModel model = (DefaultTableModel) assetsGrowthTable.getModel();
+            model.setDataVector(rowData.toArray(new String[0][]), columnName);
+            
+            DefaultTableModel newModel = new DefaultTableModel(rowData.toArray(new String[0][]), columnName) {
+                // Override isCellEditable to make the "Percentage" column non-editable
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    // Return false for the "Percentage" column (column 3)
+                    return column != 3;
+                }
+            };
+            assetsGrowthTable.setModel(newModel);
+            
+            // Add an empty row
+            String[] emptyRow = {"", "", ""};
+            //rowData.add(emptyRow);
+            newModel.addRow(emptyRow);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_formWindowOpened
+
+    private void updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateActionPerformed
+        // update selected data
+
+        int year= Integer.parseInt(assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),0).toString());
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "update assetgrowth set assetgrowth_year='"+assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),0)+"',"
+                    +"assetgrowth_money='"+assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),1)+"',"
+                    +"assetgrowth_change='"+assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),2)+"' where assetgrowth_year='"+year+"'"; 
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            
+            
+            int c = JOptionPane.showConfirmDialog(this, "Are you sure you want to change?","",JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE);
+            if(c==0){
+                boolean r = p.execute();
+                if(!r){
+                    JOptionPane.showMessageDialog(this, "Updated");
+                    formWindowOpened(null);
+                    assetsGrowthChart.clear();
+                    lineChart();
+                }else{
+                    JOptionPane.showMessageDialog(this, "Error! Try Again.");
+                }
+            }
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_updateActionPerformed
+
+    private void deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteActionPerformed
+        // delete the selected data
+        int year= Integer.parseInt(assetsGrowthTable.getValueAt(assetsGrowthTable.getSelectedRow(),0).toString());
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "delete FROM assetgrowth where assetgrowth_year="+"'"+year+"'"; 
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            
+            int c = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete?","Warning",JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if(c==0){
+                if(!p.execute()){
+                    formWindowOpened(null);
+                    assetsGrowthChart.clear();
+                    lineChart();
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_deleteActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -684,10 +1063,19 @@ public class Dashboard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel Dashboard_Left;
+    private javax.swing.JPanel Dashboard_Right;
+    private javax.swing.JPanel Dashboard_Upper;
+    private javax.swing.JButton add;
+    private chart.CurveLineChart assetsGrowthChart;
+    private javax.swing.JTable assetsGrowthTable;
     private javax.swing.JPanel bank;
     private javax.swing.JPanel binance;
     private javax.swing.JPanel cashOnHand;
+    private javax.swing.JLabel currentAsset;
+    private javax.swing.JLabel currentLiabilities;
     private javax.swing.JPanel dashboard;
+    private javax.swing.JButton delete;
     private javax.swing.JPanel fixedDeposit;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -696,9 +1084,12 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel logOut;
     private javax.swing.JLabel logOutIcon;
     private javax.swing.JLabel navBank;
@@ -709,8 +1100,10 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel navPersonalLoan;
     private javax.swing.JLabel navStockMarket;
     private javax.swing.JPanel navbar;
+    private javax.swing.JLabel netAsset;
     private javax.swing.JPanel personalLoan;
     private javax.swing.JPanel stockMarket;
+    private javax.swing.JButton update;
     private javax.swing.JLabel userIcon;
     private javax.swing.JLabel userName;
     // End of variables declaration//GEN-END:variables

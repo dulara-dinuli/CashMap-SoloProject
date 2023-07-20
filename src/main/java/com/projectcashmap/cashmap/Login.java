@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import javax.swing.Timer;
 
 /**
- *
+ * 
  * @author dular
  */
 public class Login extends javax.swing.JFrame {
