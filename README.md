@@ -34,6 +34,16 @@ CashMap - Login Window
 CashMap - Dashboard
 <img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-Dashboard.png?raw=true">
 
+CashMap - Cash On Hand
+<img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-CashOnHand.png?raw=true">
+CashMap - Cash On Hand Update
+<img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-TotalCashOnHand.png?raw=true">
+
+CashMap - Stock Market
+<img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-StockMarket.png?raw=true">
+CashMap - Dividends
+<img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-Dividends.png?raw=true">
+
 #
 
 <h3>App UI drafts (which are to be implemented):</h3>
