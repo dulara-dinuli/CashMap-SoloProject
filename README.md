@@ -28,7 +28,7 @@ CashMap is a personal budget-handling app that helps to manage users' daily tran
 
 <h3>Previews:</h3>
 
-CashMap - Login Window
+CashMap - Login 
 <img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-Login.png?raw=true">
 
 CashMap - Dashboard
@@ -43,6 +43,9 @@ CashMap - Stock Market
 <img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-StockMarket.png?raw=true">
 CashMap - Dividends
 <img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-Dividends.png?raw=true">
+
+CashMap - Dividends
+<img src= "https://github.com/dulara-dinuli/CashMap-SoloProject/blob/main/ScreenShots/CashMap-Bank.png?raw=true">
 
 #
 
