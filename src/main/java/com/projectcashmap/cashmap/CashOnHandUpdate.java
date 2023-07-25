@@ -393,7 +393,7 @@ public class CashOnHandUpdate extends javax.swing.JFrame {
             model.setDataVector(rowData.toArray(new String[0][]), columnName);
             
             DefaultTableModel newModel = new DefaultTableModel(rowData.toArray(new String[0][]), columnName) {
-                // Override isCellEditable to make the "Percentage" column non-editable
+                // Override isCellEditable to make the "total" column non-editable
                 @Override
                 public boolean isCellEditable(int row, int column) {
                     // Return false for the "Percentage" column (column 10)

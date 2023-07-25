@@ -17,21 +17,29 @@ import javax.swing.border.Border;
 //for the line chart
 import java.awt.Color;
 import chart.ModelChart;
+import com.toedter.calendar.JDateChooser;
 import java.awt.Dimension;
+import java.lang.reflect.Field;
+import java.sql.Date;
 
 //for the table
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
 /**
  *
@@ -418,7 +426,13 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
         totalDividendsLabel = new javax.swing.JLabel();
         gainPercentage = new javax.swing.JLabel();
         bank = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        bankTable = new javax.swing.JTable();
+        bankAdd = new javax.swing.JButton();
+        bankUpdate = new javax.swing.JButton();
+        bankDelete = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
+        bankAmount = new javax.swing.JLabel();
         binance = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         personalLoan = new javax.swing.JPanel();
@@ -1063,29 +1077,105 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
         );
 
         bank.setBackground(new java.awt.Color(255, 255, 255));
+        bank.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        jLabel4.setBackground(new java.awt.Color(47, 47, 57));
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("Bank");
-        jLabel4.setOpaque(true);
+        bankTable.setBackground(new java.awt.Color(255, 255, 255));
+        bankTable.setForeground(new java.awt.Color(51, 51, 51));
+        bankTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        bankTable.setFillsViewportHeight(true);
+        bankTable.setGridColor(new java.awt.Color(255, 255, 255));
+        bankTable.setRowHeight(40);
+        bankTable.setSelectionBackground(new java.awt.Color(255, 231, 179));
+        bankTable.setSelectionForeground(new java.awt.Color(51, 51, 51));
+        jScrollPane2.setViewportView(bankTable);
+
+        bankAdd.setBackground(new java.awt.Color(255, 183, 0));
+        bankAdd.setForeground(new java.awt.Color(51, 51, 51));
+        bankAdd.setText("Add");
+        bankAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bankAddActionPerformed(evt);
+            }
+        });
+
+        bankUpdate.setBackground(new java.awt.Color(255, 183, 0));
+        bankUpdate.setForeground(new java.awt.Color(51, 51, 51));
+        bankUpdate.setText("Update");
+        bankUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bankUpdateActionPerformed(evt);
+            }
+        });
+
+        bankDelete.setBackground(new java.awt.Color(255, 183, 0));
+        bankDelete.setForeground(new java.awt.Color(51, 51, 51));
+        bankDelete.setText("Delete");
+        bankDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bankDeleteActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel11.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        jLabel11.setForeground(new java.awt.Color(96, 96, 96));
+        jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel11.setText("Amount");
+
+        bankAmount.setBackground(new java.awt.Color(247, 247, 247));
+        bankAmount.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        bankAmount.setForeground(new java.awt.Color(81, 81, 81));
+        bankAmount.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        bankAmount.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 255, 255), new java.awt.Color(255, 255, 255), new java.awt.Color(191, 191, 191), new java.awt.Color(255, 255, 255)));
+        bankAmount.setOpaque(true);
 
         javax.swing.GroupLayout bankLayout = new javax.swing.GroupLayout(bank);
         bank.setLayout(bankLayout);
         bankLayout.setHorizontalGroup(
             bankLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(bankLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(298, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(bankLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(bankLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(bankAdd)
+                        .addGap(18, 18, 18)
+                        .addComponent(bankUpdate)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(bankDelete))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1025, Short.MAX_VALUE)
+                    .addGroup(bankLayout.createSequentialGroup()
+                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(bankAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         bankLayout.setVerticalGroup(
             bankLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(bankLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel4)
-                .addContainerGap(317, Short.MAX_VALUE))
+                .addGroup(bankLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(bankLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(bankLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(bankAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(bankLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bankAdd)
+                    .addComponent(bankDelete)
+                    .addComponent(bankUpdate))
+                .addContainerGap())
         );
 
         binance.setBackground(new java.awt.Color(255, 255, 255));
@@ -1184,7 +1274,7 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
                     .addComponent(stockMarket, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                    .addGap(0, 201, Short.MAX_VALUE)
+                    .addGap(0, 200, Short.MAX_VALUE)
                     .addComponent(bank, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -1395,7 +1485,74 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
 
         } catch (Exception e) {
             e.printStackTrace();
-        }         
+        }
+        
+        // add data to the Bank Table
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "SELECT * FROM bank";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            ResultSet r = p.executeQuery();
+
+            // Create a list to hold the data rows with the additional column
+            List<String[]> rowData = new ArrayList<>();
+            
+            double balancePrevious=0;
+
+            while (r.next()) {
+                int id = r.getInt("bank_id");
+                Date date = r.getDate("bank_date");
+                String creditDescription = r.getString("bank_creditDescription");
+                double credit = r.getDouble("bank_credit");
+                String debitDescription = r.getString("bank_debitDescription");
+                double debit = r.getDouble("bank_debit");
+                
+                double balance = 0;
+                balance = balancePrevious + credit - debit;
+                bankAmount.setText(String.valueOf(balance));
+                
+                balancePrevious = balance;
+                
+                // Create a DecimalFormat instance with the desired format pattern
+                DecimalFormat df = new DecimalFormat("#.##");
+                String formattedBalance = df.format(balance);
+                
+                rowData.add(new String[]{String.valueOf(id), String.valueOf(date), String.valueOf(creditDescription), 
+                    String.valueOf(credit), String.valueOf(debitDescription), String.valueOf(debit), 
+                    String.valueOf(formattedBalance)});
+            }
+
+            String[] columnName = {"ID", "Date", "Description (Credit)", "Credit (LKR)", "Description (Debit)", "Debit", "Balance"}; 
+            DefaultTableModel model = (DefaultTableModel) bankTable.getModel();
+            model.setDataVector(rowData.toArray(new String[0][]), columnName);
+            
+            DefaultTableModel newModel = new DefaultTableModel(rowData.toArray(new String[0][]), columnName) {
+                // Override isCellEditable to make the "balance" column non-editable
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    // Return false for the "Percentage" column (column 3)
+                    return column != 7;
+                }
+            };
+            bankTable.setModel(newModel);
+            
+            // Hide the "ID" column by setting its width to 0
+            TableColumn idColumn = bankTable.getColumnModel().getColumn(0);
+            idColumn.setMinWidth(0);
+            idColumn.setMaxWidth(0);
+            idColumn.setPreferredWidth(0);
+            idColumn.setResizable(false);
+            
+            // Add an empty row
+            String[] emptyRow = {"", "", "", "", "", ""};
+            //rowData.add(emptyRow);
+            newModel.addRow(emptyRow);
+            
+            bankTable.getColumnModel().getColumn(1).setCellEditor(new JDateChooserEditor(new JCheckBox()));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_formWindowOpened
 
     private void updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateActionPerformed
@@ -1524,6 +1681,111 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
     dividends.addObserver(this); // Register the dashboard as an observer
     }//GEN-LAST:event_dividendsLabelMouseClicked
 
+    private void bankAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bankAddActionPerformed
+        // Insert data to the database
+        int selectedRow = bankTable.getSelectedRow();
+
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+
+            // Get values from the table row and handle null values
+            String dateString = bankTable.getValueAt(selectedRow, 1).toString();
+            String creditDescription = bankTable.getValueAt(selectedRow, 2).toString();
+            double credit = getDoubleValue(bankTable.getValueAt(selectedRow, 3));
+            String debitDescription = bankTable.getValueAt(selectedRow, 4).toString();
+            double debit = getDoubleValue(bankTable.getValueAt(selectedRow, 5));
+  
+
+            // Convert the date String to java.sql.Date using SimpleDateFormat
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date utilDate = dateFormat.parse(dateString);
+            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+
+            // Prepare and execute the SQL insert statement
+            String sql = "INSERT INTO bank (bank_date, bank_creditDescription, bank_credit, "
+            + "bank_debitDescription,bank_debit) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            p.setDate(1, sqlDate);
+            p.setString(2, creditDescription);
+            p.setDouble(3, credit);
+            p.setString(4, debitDescription);
+            p.setDouble(5, debit);
+            
+            boolean r = p.execute();
+            if (!r) {
+                JOptionPane.showMessageDialog(this, "Inserted.");
+                formWindowOpened(null);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error! Try Again.");
+            }
+
+            p.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Helper method to handle null values and convert to int
+    private double getDoubleValue(Object value) {
+        if (value == null) {
+            return 0;
+        }
+        try {
+            return Double.parseDouble(value.toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }//GEN-LAST:event_bankAddActionPerformed
+
+    private void bankUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bankUpdateActionPerformed
+        // update selected data
+
+        int id= Integer.parseInt(bankTable.getValueAt(bankTable.getSelectedRow(),0).toString());
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "update bank set bank_date='"+bankTable.getValueAt(bankTable.getSelectedRow(),1)+"',"
+            +"bank_creditDscription='"+bankTable.getValueAt(bankTable.getSelectedRow(),2)+"',"
+            +"bank_credit='"+bankTable.getValueAt(bankTable.getSelectedRow(),3)+"',"
+            +"bank_debitDscription='"+bankTable.getValueAt(bankTable.getSelectedRow(),4)+"',"
+            +"bank_debit='"+bankTable.getValueAt(bankTable.getSelectedRow(),5)+"' where bank_id='"+id+"'";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+
+            int c = JOptionPane.showConfirmDialog(this, "Are you sure you want to change?","",JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE);
+            if(c==0){
+                boolean r = p.execute();
+                if(!r){
+                    JOptionPane.showMessageDialog(this, "Updated");
+                    formWindowOpened(null);
+                }else{
+                    JOptionPane.showMessageDialog(this, "Error! Try Again.");
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_bankUpdateActionPerformed
+
+    private void bankDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bankDeleteActionPerformed
+        // delete the selected data
+        int id= Integer.parseInt(bankTable.getValueAt(bankTable.getSelectedRow(),0).toString());
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "delete FROM bank where bank_id="+"'"+id+"'";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+
+            int c = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete?","Warning",JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if(c==0){
+                if(!p.execute()){
+                    formWindowOpened(null);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_bankDeleteActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1567,6 +1829,11 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
     private chart.CurveLineChart assetsGrowthChart;
     private javax.swing.JTable assetsGrowthTable;
     private javax.swing.JPanel bank;
+    private javax.swing.JButton bankAdd;
+    private javax.swing.JLabel bankAmount;
+    private javax.swing.JButton bankDelete;
+    private javax.swing.JTable bankTable;
+    private javax.swing.JButton bankUpdate;
     private javax.swing.JPanel binance;
     private javax.swing.JTextField buyingPower;
     private javax.swing.JLabel buyingPowerLabel;
@@ -1586,7 +1853,7 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
     private javax.swing.JLabel gainPercentageLabel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -1596,6 +1863,7 @@ public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObs
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel logOut;
     private javax.swing.JLabel logOutIcon;
@@ -1637,3 +1905,82 @@ class DataStorage {
     }
 }
 
+class JDateChooserEditor extends DefaultCellEditor{
+  
+  private JDateChooser dateChooser;
+  public JDateChooserEditor(JCheckBox checkBox)
+  {
+    super(checkBox);
+    dateChooser = new JDateChooser();
+    dateChooser.setDateFormatString("yyyy-MM-dd");
+    
+  }
+
+  JDateChooser date;
+  public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) 
+  {
+        if (value instanceof String) {
+            try {
+                dateChooser.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd").parse((String) value));
+            } catch (java.text.ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return dateChooser;
+  }
+
+  public Object getCellEditorValue() 
+  {
+            if (dateChooser.getDate() != null) {
+            return new java.text.SimpleDateFormat("yyyy-MM-dd").format(dateChooser.getDate());
+        } else {
+            return super.getCellEditorValue();
+        }
+  }
+
+    public boolean stopCellEditing() {
+        if (dateChooser.getDate() != null) {
+            return super.stopCellEditing();
+        } else {
+            return false;
+        }
+    }
+
+  protected void fireEditingStopped() {
+    super.fireEditingStopped();
+  }
+}
+
+class CustomJDateChooser extends JDateChooser {
+
+    public CustomJDateChooser() {
+        super();
+    }
+
+    public CustomJDateChooser(String dateFormat) {
+        super();
+        this.setDateFormatString(dateFormat);
+    }
+
+    public Dimension getCalendarPreferredSize() {
+        return new Dimension(300, 200); // Customize the size as per your requirement
+    }
+
+    @Override
+    public void setPreferredSize(Dimension preferredSize) {
+        super.setPreferredSize(preferredSize);
+
+        // Modify the preferred size of the popup calendar
+        try {
+            Field popupField = JDateChooser.class.getDeclaredField("datePopupMenu");
+            popupField.setAccessible(true);
+            JPopupMenu popupMenu = (JPopupMenu) popupField.get(this);
+            if (popupMenu != null) {
+                popupMenu.setPreferredSize(preferredSize);
+                popupMenu.setMaximumSize(preferredSize);
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+}
