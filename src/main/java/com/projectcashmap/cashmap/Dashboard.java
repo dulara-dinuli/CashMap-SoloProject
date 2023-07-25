@@ -17,6 +17,7 @@ import javax.swing.border.Border;
 //for the line chart
 import java.awt.Color;
 import chart.ModelChart;
+import java.awt.Dimension;
 
 //for the table
 import java.sql.PreparedStatement;
@@ -24,19 +25,30 @@ import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.WindowConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author dulara dinuli
  */
-public class Dashboard extends javax.swing.JFrame {
 
+interface TotalDividendsObserver {
+    void updateTotalDividends(double totalDividends);
+}
+
+public class Dashboard extends javax.swing.JFrame implements CashOnHandUpdateObserver,TotalDividendsObserver{
+
+    private CashOnHandUpdate cashOnHandUpdateForm;
     /**
      * Creates new form Dashboard
      */
-    
+
     //default border for the nav items
     Border defaultNavItemBorder = BorderFactory.createMatteBorder(0, 0, 0, 0, Color.decode("#1d1d2f"));
     
@@ -87,11 +99,119 @@ public class Dashboard extends javax.swing.JFrame {
         
         addActionToNavbarItems();
         
+        showPanel(dashboard);
+        
         // create the line chart
         assetsGrowthChart.setTitle("Assets Growth");
         assetsGrowthChart.addLegend("Amount (LKR)", Color.decode("#00b5a0"), Color.decode("#004d44"));
         lineChart();
+        
+        
+        // Add a DocumentListener to the cost,marketvalue fields document
+        cost.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { 
+                stockMarketComponentShown(null);
+                saveStockMarketDataToPreferences();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                stockMarketComponentShown(null);
+                saveStockMarketDataToPreferences();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {}
+        });    
+        marketValue.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { 
+                stockMarketComponentShown(null);
+                saveStockMarketDataToPreferences();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                stockMarketComponentShown(null);
+                saveStockMarketDataToPreferences();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {}
+        });
+        buyingPower.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {saveStockMarketDataToPreferences();}
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {saveStockMarketDataToPreferences();}
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {}
+        });   
     
+        loadStockMarketDataFromPreferences();
+    }
+    
+    // Method to save data from text fields
+    private void saveStockMarketDataToPreferences() {
+        // Get the data from text fields
+        String costVariable = cost.getText().trim();
+        String marketValueVariable= marketValue.getText().trim();
+        String buyingPowerVariable = buyingPower.getText().trim();
+
+        // Concatenate the data into a single string with a delimiter (e.g., comma)
+        String dataToSave = costVariable + "," + marketValueVariable + "," + buyingPowerVariable;
+
+        // Save the data using the DataStorage class
+        DataStorage.saveData(dataToSave);
+    }
+    
+    @Override
+    public void updateTotalDividends(double totalDividends) {
+        // Update the totalDividends label in Dashboard with the new value
+        totalDividendsLabel.setText(String.valueOf(totalDividends));
+//        saveStockMarketDataToPreferences();
+    }
+
+    // Method to load data from preferences and set the values to text fields
+    private void loadStockMarketDataFromPreferences() {
+        // Load the data using the DataStorage class
+        String data = DataStorage.loadData();
+        String dividendsData = NewDataStorage.newLoadData();
+
+        // Check if data is not null and not empty
+        if (data != null && !data.isEmpty()) {
+            // Split the data using the delimiter (e.g., comma) to get individual values
+            String[] values = data.split(",");
+
+            // Check if the split result has the expected number of values (3 in this case)
+            if (values.length == 3) {
+                // Set the values to the text fields
+                cost.setText(values[0]);
+                marketValue.setText(values[1]);
+                buyingPower.setText(values[2]);
+            }
+        }
+        if (dividendsData != null && !dividendsData.isEmpty()) {
+            totalDividendsLabel.setText(dividendsData);
+        }
+    }
+    
+    @Override
+    public void updateCashOnHandTable() {
+        // Update the cash on hand table in the dashboard
+        // You can re-fetch the data from the database or update the existing data model and refresh the table.
+        // For simplicity, let's assume you have a method called "refreshTableData()" that updates the table data.
+        refreshTableData();
+    }
+
+    private void refreshTableData() {
+        // Refresh the cash on hand table data here
+        // For example, you can query the database to fetch the latest data and update the table model
+        // For demonstration, let's assume you have a method called "fetchCashOnHandData()" that fetches data from the database
+        formWindowOpened(null);
     }
     
     // Helper method to get the index of a given JLabel in the navbarItem array
@@ -132,7 +252,6 @@ public class Dashboard extends javax.swing.JFrame {
         // show only the selected panel
         panel.setVisible(true);
     }
-    
     
     public void addActionToNavbarItems(){
         // get labels in the navbar
@@ -279,9 +398,25 @@ public class Dashboard extends javax.swing.JFrame {
         add = new javax.swing.JButton();
         delete = new javax.swing.JButton();
         cashOnHand = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        cashOnHandTable = new javax.swing.JTable();
+        jLabel10 = new javax.swing.JLabel();
+        totalCashOnHand = new javax.swing.JLabel();
+        updateCashOnHand = new javax.swing.JButton();
         stockMarket = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
+        panelShadow1 = new panel.PanelShadow();
+        costLabel = new javax.swing.JLabel();
+        marketValueLabel = new javax.swing.JLabel();
+        dividendsLabel = new javax.swing.JLabel();
+        buyingPowerLabel = new javax.swing.JLabel();
+        gainLabel = new javax.swing.JLabel();
+        gainPercentageLabel = new javax.swing.JLabel();
+        cost = new javax.swing.JTextField();
+        marketValue = new javax.swing.JTextField();
+        buyingPower = new javax.swing.JTextField();
+        gain = new javax.swing.JLabel();
+        totalDividendsLabel = new javax.swing.JLabel();
+        gainPercentage = new javax.swing.JLabel();
         bank = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         binance = new javax.swing.JPanel();
@@ -292,6 +427,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("CashMap");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
@@ -571,7 +707,8 @@ public class Dashboard extends javax.swing.JFrame {
 
             }
         ));
-        assetsGrowthTable.setOpaque(false);
+        assetsGrowthTable.setFillsViewportHeight(true);
+        assetsGrowthTable.setGridColor(new java.awt.Color(255, 255, 255));
         assetsGrowthTable.setRowHeight(40);
         assetsGrowthTable.setSelectionBackground(new java.awt.Color(118, 152, 154));
         assetsGrowthTable.setSelectionForeground(new java.awt.Color(51, 51, 51));
@@ -652,55 +789,277 @@ public class Dashboard extends javax.swing.JFrame {
         );
 
         cashOnHand.setBackground(new java.awt.Color(255, 255, 255));
+        cashOnHand.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 20, 20));
 
-        jLabel2.setBackground(new java.awt.Color(47, 47, 57));
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Cash On Hand");
-        jLabel2.setOpaque(true);
+        cashOnHandTable.setBackground(new java.awt.Color(255, 255, 255));
+        cashOnHandTable.setForeground(new java.awt.Color(51, 51, 51));
+        cashOnHandTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        cashOnHandTable.setFillsViewportHeight(true);
+        cashOnHandTable.setGridColor(new java.awt.Color(166, 198, 198));
+        cashOnHandTable.setRowHeight(65);
+        cashOnHandTable.setSelectionBackground(new java.awt.Color(118, 152, 154));
+        cashOnHandTable.setSelectionForeground(new java.awt.Color(51, 51, 51));
+        jScrollPane3.setViewportView(cashOnHandTable);
+
+        jLabel10.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel10.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(96, 96, 96));
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel10.setText("LKR");
+
+        totalCashOnHand.setBackground(new java.awt.Color(247, 247, 247));
+        totalCashOnHand.setFont(new java.awt.Font("Segoe UI Historic", 1, 18)); // NOI18N
+        totalCashOnHand.setForeground(new java.awt.Color(81, 81, 81));
+        totalCashOnHand.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        totalCashOnHand.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 255, 255), new java.awt.Color(255, 255, 255), new java.awt.Color(191, 191, 191), new java.awt.Color(255, 255, 255)));
+        totalCashOnHand.setOpaque(true);
+
+        updateCashOnHand.setBackground(new java.awt.Color(0, 67, 61));
+        updateCashOnHand.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        updateCashOnHand.setForeground(new java.awt.Color(255, 255, 255));
+        updateCashOnHand.setText("Update");
+        updateCashOnHand.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateCashOnHandActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout cashOnHandLayout = new javax.swing.GroupLayout(cashOnHand);
         cashOnHand.setLayout(cashOnHandLayout);
         cashOnHandLayout.setHorizontalGroup(
             cashOnHandLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(cashOnHandLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(302, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(cashOnHandLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(cashOnHandLayout.createSequentialGroup()
+                        .addComponent(updateCashOnHand, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 1021, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, cashOnHandLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(totalCashOnHand, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         cashOnHandLayout.setVerticalGroup(
             cashOnHandLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(cashOnHandLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel2)
-                .addContainerGap(317, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(cashOnHandLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(totalCashOnHand, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(updateCashOnHand, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         stockMarket.setBackground(new java.awt.Color(255, 255, 255));
+        stockMarket.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                stockMarketComponentShown(evt);
+            }
+        });
 
-        jLabel3.setBackground(new java.awt.Color(47, 47, 57));
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("Stock Market");
-        jLabel3.setOpaque(true);
+        panelShadow1.setBackground(new java.awt.Color(233, 226, 232));
+        panelShadow1.setGradientType(panel.PanelShadow.GradientType.VERTICAL);
+        panelShadow1.setRadius(30);
+
+        costLabel.setBackground(new java.awt.Color(255, 255, 255));
+        costLabel.setFont(new java.awt.Font("Segoe UI Historic", 1, 20)); // NOI18N
+        costLabel.setForeground(new java.awt.Color(73, 73, 73));
+        costLabel.setText("Cost");
+
+        marketValueLabel.setBackground(new java.awt.Color(255, 255, 255));
+        marketValueLabel.setFont(new java.awt.Font("Segoe UI Historic", 1, 20)); // NOI18N
+        marketValueLabel.setForeground(new java.awt.Color(73, 73, 73));
+        marketValueLabel.setText("Market Value");
+
+        dividendsLabel.setBackground(new java.awt.Color(246, 223, 255));
+        dividendsLabel.setFont(new java.awt.Font("Segoe UI Historic", 1, 20)); // NOI18N
+        dividendsLabel.setForeground(new java.awt.Color(73, 73, 73));
+        dividendsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        dividendsLabel.setText("Dividends");
+        dividendsLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        dividendsLabel.setOpaque(true);
+        dividendsLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                dividendsLabelMouseClicked(evt);
+            }
+        });
+
+        buyingPowerLabel.setBackground(new java.awt.Color(255, 255, 255));
+        buyingPowerLabel.setFont(new java.awt.Font("Segoe UI Historic", 1, 20)); // NOI18N
+        buyingPowerLabel.setForeground(new java.awt.Color(73, 73, 73));
+        buyingPowerLabel.setText("Buying Power");
+
+        gainLabel.setBackground(new java.awt.Color(255, 255, 255));
+        gainLabel.setFont(new java.awt.Font("Segoe UI Historic", 1, 20)); // NOI18N
+        gainLabel.setForeground(new java.awt.Color(73, 73, 73));
+        gainLabel.setText("Gain");
+
+        gainPercentageLabel.setBackground(new java.awt.Color(255, 255, 255));
+        gainPercentageLabel.setFont(new java.awt.Font("Segoe UI Historic", 1, 20)); // NOI18N
+        gainPercentageLabel.setForeground(new java.awt.Color(73, 73, 73));
+        gainPercentageLabel.setText("Gain %");
+
+        cost.setBackground(new java.awt.Color(211, 211, 211));
+        cost.setColumns(1);
+        cost.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        cost.setForeground(new java.awt.Color(51, 51, 51));
+        cost.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        cost.setToolTipText("");
+        cost.setActionCommand("<Not Set>");
+        cost.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        cost.setSelectionColor(new java.awt.Color(169, 220, 255));
+        cost.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                costFocusGained(evt);
+            }
+        });
+        cost.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                costComponentShown(evt);
+            }
+        });
+        cost.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+                costInputMethodTextChanged(evt);
+            }
+        });
+        cost.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                costActionPerformed(evt);
+            }
+        });
+
+        marketValue.setBackground(new java.awt.Color(211, 211, 211));
+        marketValue.setColumns(1);
+        marketValue.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        marketValue.setForeground(new java.awt.Color(51, 51, 51));
+        marketValue.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        marketValue.setToolTipText("");
+        marketValue.setActionCommand("<Not Set>");
+        marketValue.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        marketValue.setSelectionColor(new java.awt.Color(169, 220, 255));
+
+        buyingPower.setBackground(new java.awt.Color(211, 211, 211));
+        buyingPower.setColumns(1);
+        buyingPower.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        buyingPower.setForeground(new java.awt.Color(51, 51, 51));
+        buyingPower.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        buyingPower.setToolTipText("");
+        buyingPower.setActionCommand("<Not Set>");
+        buyingPower.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        buyingPower.setSelectionColor(new java.awt.Color(169, 220, 255));
+
+        gain.setBackground(new java.awt.Color(255, 255, 255));
+        gain.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        gain.setForeground(new java.awt.Color(51, 51, 51));
+        gain.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        gain.setOpaque(true);
+
+        totalDividendsLabel.setBackground(new java.awt.Color(198, 198, 198));
+        totalDividendsLabel.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        totalDividendsLabel.setForeground(new java.awt.Color(51, 51, 51));
+        totalDividendsLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        totalDividendsLabel.setOpaque(true);
+
+        gainPercentage.setBackground(new java.awt.Color(255, 255, 255));
+        gainPercentage.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        gainPercentage.setForeground(new java.awt.Color(51, 51, 51));
+        gainPercentage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        gainPercentage.setOpaque(true);
+
+        javax.swing.GroupLayout panelShadow1Layout = new javax.swing.GroupLayout(panelShadow1);
+        panelShadow1.setLayout(panelShadow1Layout);
+        panelShadow1Layout.setHorizontalGroup(
+            panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelShadow1Layout.createSequentialGroup()
+                .addGap(82, 82, 82)
+                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelShadow1Layout.createSequentialGroup()
+                        .addComponent(costLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cost, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelShadow1Layout.createSequentialGroup()
+                        .addComponent(marketValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(marketValue, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelShadow1Layout.createSequentialGroup()
+                        .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelShadow1Layout.createSequentialGroup()
+                                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(buyingPowerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(gainLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(gainPercentageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelShadow1Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(dividendsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(154, 154, 154)))
+                        .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(buyingPower, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(totalDividendsLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(gain, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(gainPercentage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGap(55, 55, 55))
+        );
+        panelShadow1Layout.setVerticalGroup(
+            panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelShadow1Layout.createSequentialGroup()
+                .addGap(56, 56, 56)
+                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(costLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(25, 25, 25)
+                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(marketValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(marketValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(25, 25, 25)
+                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(buyingPowerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(buyingPower, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(54, 54, 54)
+                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(gain, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(gainLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(24, 24, 24)
+                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(gainPercentage, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(gainPercentageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(113, 113, 113)
+                .addGroup(panelShadow1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(totalDividendsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dividendsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(87, 87, 87))
+        );
 
         javax.swing.GroupLayout stockMarketLayout = new javax.swing.GroupLayout(stockMarket);
         stockMarket.setLayout(stockMarketLayout);
         stockMarketLayout.setHorizontalGroup(
             stockMarketLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(stockMarketLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(301, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, stockMarketLayout.createSequentialGroup()
+                .addContainerGap(176, Short.MAX_VALUE)
+                .addComponent(panelShadow1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(172, 172, 172))
         );
         stockMarketLayout.setVerticalGroup(
             stockMarketLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(stockMarketLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(jLabel3)
-                .addContainerGap(317, Short.MAX_VALUE))
+                .addGap(36, 36, 36)
+                .addComponent(panelShadow1, javax.swing.GroupLayout.PREFERRED_SIZE, 553, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         bank.setBackground(new java.awt.Color(255, 255, 255));
@@ -817,11 +1176,11 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(dashboard, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                    .addGap(0, 197, Short.MAX_VALUE)
+                    .addGap(0, 206, Short.MAX_VALUE)
                     .addComponent(cashOnHand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                    .addGap(0, 198, Short.MAX_VALUE)
+                    .addGap(0, 206, Short.MAX_VALUE)
                     .addComponent(stockMarket, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -928,7 +1287,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_addActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        // add data to the table
+        // add data to the Assets Groth Table
         try {
             DatabaseConnection.getInstance().connectToDatabase();
             String sql = "SELECT * FROM assetgrowth";
@@ -937,12 +1296,18 @@ public class Dashboard extends javax.swing.JFrame {
 
             // Create a list to hold the data rows with the additional column
             List<String[]> rowData = new ArrayList<>();
+            
+            double moneyPrevious=0;
 
             while (r.next()) {
                 int year = r.getInt("assetgrowth_year");
-                double money = r.getDouble("assetgrowth_money");
                 double change = r.getDouble("assetgrowth_change");
-                double percentage = (change*100)/money;
+                double percentage = 0;
+                if(moneyPrevious!=0){
+                    percentage = (change*100)/moneyPrevious;
+                }
+                double money = r.getDouble("assetgrowth_money");
+                moneyPrevious = money;
                 
                 // Create a DecimalFormat instance with the desired format pattern
                 DecimalFormat df = new DecimalFormat("#.##");
@@ -973,6 +1338,64 @@ public class Dashboard extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        // add data to the Cash On Hand Table
+        try {
+            DatabaseConnection.getInstance().connectToDatabase();
+            String sql = "SELECT '5000' AS Note, GREATEST(SUM(cashonhand_5000), 0) AS Quantity FROM cashonhandupdate\n" +
+                        "UNION\n" +
+                        "SELECT '2000' AS Note, GREATEST(SUM(cashonhand_2000), 0) AS Quantity FROM cashonhandupdate\n" +
+                        "UNION\n" +
+                        "SELECT '1000' AS Note, GREATEST(SUM(cashonhand_1000), 0) AS Quantity FROM cashonhandupdate\n" +
+                        "UNION\n" +
+                        "SELECT '500' AS Note, GREATEST(SUM(cashonhand_500), 0) AS Quantity FROM cashonhandupdate\n" +
+                        "UNION\n" +
+                        "SELECT '100' AS Note, GREATEST(SUM(cashonhand_100), 0) AS Quantity FROM cashonhandupdate\n" +
+                        "UNION\n" +
+                        "SELECT '50' AS Note, GREATEST(SUM(cashonhand_50), 0) AS Quantity FROM cashonhandupdate\n" +
+                        "UNION\n" +
+                        "SELECT '20' AS Note, GREATEST(SUM(cashonhand_20), 0) AS Quantity FROM cashonhandupdate;";
+            PreparedStatement p = DatabaseConnection.getInstance().getConnection().prepareStatement(sql);
+            ResultSet r = p.executeQuery();
+
+            // Create a list to hold the data rows with the additional column
+            List<String[]> rowData = new ArrayList<>();
+            
+            double cashOnHandTotal =0;
+
+            while (r.next()) {
+                int notes = r.getInt("Note");
+                int quantity = r.getInt("Quantity");
+                double total = notes*quantity;
+                
+                cashOnHandTotal+=total;
+                
+                // Create a DecimalFormat instance with the desired format pattern
+                DecimalFormat df = new DecimalFormat("#.##");
+                String formattedTotal = df.format(total);
+                
+                rowData.add(new String[]{String.valueOf(notes), String.valueOf(quantity), String.valueOf(formattedTotal)});
+            }
+
+            String[] columnName = {"Notes", "Quantity", "Total (LKR)"}; 
+            DefaultTableModel model = (DefaultTableModel) cashOnHandTable.getModel();
+            model.setDataVector(rowData.toArray(new String[0][]), columnName);
+            
+            DefaultTableModel newModel = new DefaultTableModel(rowData.toArray(new String[0][]), columnName) {
+                // Override isCellEditable to make the "Percentage" column non-editable
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    // Return false for all columns (0, 1, 2, 3)
+                    return false;
+                }
+            };
+            cashOnHandTable.setModel(newModel);
+            
+            totalCashOnHand.setText(String.valueOf(cashOnHandTotal));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }         
     }//GEN-LAST:event_formWindowOpened
 
     private void updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateActionPerformed
@@ -1027,6 +1450,80 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_deleteActionPerformed
 
+    private void updateCashOnHandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateCashOnHandActionPerformed
+    // Popup the cash on hand update window
+    CashOnHandUpdate cashOnHandUpdate = new CashOnHandUpdate();
+
+    // Set the default close operation to DISPOSE_ON_CLOSE
+    cashOnHandUpdate.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+    cashOnHandUpdate.setVisible(true);
+    cashOnHandUpdate.addObserver(this); // Register the dashboard as an observer
+    }//GEN-LAST:event_updateCashOnHandActionPerformed
+
+    private void costActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_costActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_costActionPerformed
+
+    private void costInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_costInputMethodTextChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_costInputMethodTextChanged
+
+    private void stockMarketComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_stockMarketComponentShown
+        // get the gain and gain percentage values
+        double inputCost =(cost.getText().trim()).isEmpty() ? 0 : Double.parseDouble(cost.getText().trim());
+        double inputMarketValue = (marketValue.getText().trim()).isEmpty() ? 0 : Double.parseDouble(marketValue.getText().trim());
+        double inputBuyingPower = (buyingPower.getText().trim()).isEmpty() ? 0 : Double.parseDouble(buyingPower.getText().trim());
+        
+        double gainValue = inputMarketValue - inputCost;
+        double gainPercentageValue;
+        if (inputCost == 0) {
+            gainPercentageValue = 0; 
+        } else {
+            gainPercentageValue = (gainValue/ inputCost)*100;
+        }
+        
+        // Create a DecimalFormat instance with the desired format pattern
+        DecimalFormat df = new DecimalFormat("#.##");
+        String formattedGainValue = df.format(gainValue); 
+        String formattedGainPercentageValue = df.format(gainPercentageValue); 
+        
+        gain.setText(formattedGainValue);
+        gainPercentage.setText(formattedGainPercentageValue +" %");
+        
+        // Set the text color based on the values
+        if (gainValue < 0) {
+            gain.setForeground(Color.RED);
+        } else {
+            gain.setForeground(Color.decode("#008227"));
+        }
+
+        if (gainPercentageValue < 0) {
+            gainPercentage.setForeground(Color.RED);
+        } else {
+            gainPercentage.setForeground(Color.decode("#008227"));
+        }
+    }//GEN-LAST:event_stockMarketComponentShown
+
+    private void costFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_costFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_costFocusGained
+
+    private void costComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_costComponentShown
+        // TODO add your handling code here:
+    }//GEN-LAST:event_costComponentShown
+
+    private void dividendsLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dividendsLabelMouseClicked
+    // Popup the cash on hand update window
+    Dividends dividends = new Dividends();
+
+    // Set the default close operation to DISPOSE_ON_CLOSE
+    dividends.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+    dividends.setVisible(true);
+    dividends.addObserver(this); // Register the dashboard as an observer
+    }//GEN-LAST:event_dividendsLabelMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -1071,15 +1568,24 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTable assetsGrowthTable;
     private javax.swing.JPanel bank;
     private javax.swing.JPanel binance;
+    private javax.swing.JTextField buyingPower;
+    private javax.swing.JLabel buyingPowerLabel;
     private javax.swing.JPanel cashOnHand;
+    private javax.swing.JTable cashOnHandTable;
+    private javax.swing.JTextField cost;
+    private javax.swing.JLabel costLabel;
     private javax.swing.JLabel currentAsset;
     private javax.swing.JLabel currentLiabilities;
     private javax.swing.JPanel dashboard;
     private javax.swing.JButton delete;
+    private javax.swing.JLabel dividendsLabel;
     private javax.swing.JPanel fixedDeposit;
+    private javax.swing.JLabel gain;
+    private javax.swing.JLabel gainLabel;
+    private javax.swing.JLabel gainPercentage;
+    private javax.swing.JLabel gainPercentageLabel;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1090,8 +1596,11 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel logOut;
     private javax.swing.JLabel logOutIcon;
+    private javax.swing.JTextField marketValue;
+    private javax.swing.JLabel marketValueLabel;
     private javax.swing.JLabel navBank;
     private javax.swing.JLabel navBinance;
     private javax.swing.JLabel navCashOnHand;
@@ -1101,10 +1610,30 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel navStockMarket;
     private javax.swing.JPanel navbar;
     private javax.swing.JLabel netAsset;
+    private panel.PanelShadow panelShadow1;
     private javax.swing.JPanel personalLoan;
     private javax.swing.JPanel stockMarket;
+    private javax.swing.JLabel totalCashOnHand;
+    private javax.swing.JLabel totalDividendsLabel;
     private javax.swing.JButton update;
+    private javax.swing.JButton updateCashOnHand;
     private javax.swing.JLabel userIcon;
     private javax.swing.JLabel userName;
     // End of variables declaration//GEN-END:variables
+
 }
+
+class DataStorage {
+    private static final String PREFERENCE_KEY = "stockMarketValues";
+
+    public static void saveData(String data) {
+        Preferences preferences = Preferences.userRoot().node("com.projectcashmap.cashmap");
+        preferences.put(PREFERENCE_KEY, data);
+    }
+
+    public static String loadData() {
+        Preferences preferences = Preferences.userRoot().node("com.projectcashmap.cashmap");
+        return preferences.get(PREFERENCE_KEY, null);
+    }
+}
+
